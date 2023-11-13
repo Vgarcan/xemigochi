@@ -69,17 +69,17 @@ class Tama:
                 'place': None
             },
             'feed': {
-                'funct': self.activate_feed,
+                'funct': self.activate_submenu,
                 'image': 'imgs/icons/food.png',
                 'place': (137, 142),
                 'submenu': {
                     'cake': {
-                        'funct': [self.feed,'cake'],
+                        'funct': [self.feed, 'cake'],
                         'image': 'imgs/icons/cake.png',
                         'place': None,
                     },
                     'burger': {
-                        'funct': [self.feed,'burger'],
+                        'funct': [self.feed, 'burger'],
                         'image': 'imgs/icons/burger.png',
                         'place': None,
                     },
@@ -116,9 +116,21 @@ class Tama:
                 'place': (315, 485)
             },
             'status': {
-                'funct': self.show_status,
+                'funct': self.activate_submenu,
                 'image': 'imgs/icons/status.png',
-                'place': (420, 485)
+                'place': (420, 485),
+                'submenu': {
+                    'pagina1': {
+                        'funct': [self.show_status, 'pagina1'],
+                        'image': 'imgs/icons/cake.png',
+                        'place': None,
+                    },
+                    'pagina2': {
+                        'funct': [self.show_status, 'pagina2'],
+                        'image': 'imgs/icons/burger.png',
+                        'place': None,
+                    },
+                }
             },
         }
         self.ITERMENU = iter(self.MENU)
@@ -135,26 +147,27 @@ class Tama:
         self.window = tk.Tk()
         self.window.title("Xemigotchi")
 
-
-        # Canvas para mostrar la imagen de la mascota
+        # Canvas para mostrar la imagen del BACKGROUND
         self.canvas = tk.Canvas(width=576, height=648)
         self.background_img = tk.PhotoImage(file="imgs/TamaFront.png")
         self.canvas.create_image(288, 324, image=self.background_img)
         self.canvas.grid(row=0, column=0)
 
-        # Botones de navegación
+        # Botones de navegación CONFIG
         self.button_img = tk.PhotoImage(file='imgs/icons/button_small.png')
+        # Boton A
         self.button_A = tk.Button(text="A", command=self.b_next,
                                   image=self.button_img, bg='indigo', highlightthickness=0)
         self.button_A.place(x=153, y=550)
+        # Boton B
         self.button_B = tk.Button(text="B", command=self.b_select,
                                   image=self.button_img, bg='indigo', highlightthickness=0)
         self.button_B.place(x=255, y=580)
+        # Boton C
         self.button_C = tk.Button(self.window, text="C", command=self.b_cancel,
                                   image=self.button_img, bg='indigo', highlightthickness=0)
         self.button_C.place(x=363, y=550)
 
-        
         # Etiqueta FEDDBACK
         self.fbtext = ''
         self.feedback_label = tk.Label(text=f"{self.fbtext}")
@@ -199,19 +212,22 @@ class Tama:
                 self.menu_value = next(self.ITERMENU)
                 if self.menu_value == 'none':
                     self.menu_value = next(self.ITERMENU)
-            
-            if len(self.MENU[self.menu_value]) >3:
-                self.SUBMENU= self.MENU[self.menu_value]['submenu']
+
+            if len(self.MENU[self.menu_value]) > 3:
+                self.SUBMENU = self.MENU[self.menu_value]['submenu']
                 self.ITERSUBMENU = iter(self.SUBMENU)
-            
-            # Cambia icono e imprime        
+            else:
+                self.SUBMENU = None
+                self.ITERSUBMENU = None
+
+            # Cambia icono e imprime
             self.show_icon(self.MENU[self.menu_value])
             self.fbtext = str(self.menu_value)
             self.feedback_label.config(text=self.fbtext)
 
         elif self.main_menu == False and self.sub_menu == True:
             # pasa a seleccionar la lista del SUB MENU
-            
+
             try:
                 self.submenu_value = next(self.ITERSUBMENU)
             except Exception:
@@ -219,7 +235,7 @@ class Tama:
                 self.submenu_value = next(self.ITERSUBMENU)
                 if self.submenu_value == 'none':
                     self.submenu_value = next(self.ITERSUBMENU)
-            # Imprime 
+            # Imprime
             self.fbtext = str(self.submenu_value)
             self.feedback_label.config(text=self.fbtext)
 
@@ -236,18 +252,23 @@ class Tama:
                     pass
 
         elif self.main_menu == False and self.sub_menu == True:
-
+            print(self.submenu_value)
             if self.submenu_value != 'none':
                 try:
-                    self.SUBMENU[self.submenu_value]['funct'][0](self.SUBMENU[self.submenu_value]['funct'][1])
+                    self.SUBMENU[self.submenu_value]['funct'][0](
+                        self.SUBMENU[self.submenu_value]['funct'][1]
+                    )
                 except Exception:
                     pass
-            
+            elif self.submenu_value == 'none':
+                self.submenu_value = next(self.ITERSUBMENU)
+                pass
 
     def b_cancel(self):
         """
         Función que se ejecuta al presionar el botón C.
         """
+        global reset
         # Lógica para retroceder
         if self.main_menu == True and self.sub_menu == False:
             if self.menu_value != 'none':
@@ -262,6 +283,7 @@ class Tama:
             # cambia al MAIN MENU
             self.main_menu = True
             self.sub_menu = False
+            reset = self.label.after(5000, self.reset_gui)
 
     ## Funciones automáticas de TAMA ##
     #################################
@@ -281,6 +303,7 @@ class Tama:
         self.reset_menu()
         self.main_menu = True
         self.sub_menu = False
+        self.feedback_label.config(text='')
 
     def add_hunger(self):
         """
@@ -312,7 +335,7 @@ class Tama:
     ## FUNCIONES DEL MENÚ ##
     #########################
 
-    def activate_feed(self):
+    def activate_submenu(self):
         """
         Activa el SUBMENU de feed.
         """
@@ -325,10 +348,6 @@ class Tama:
         """
         Aumenta el nivel de hambre de Tamagotchi.
         """
-        
-
-        self.main_menu = False
-        self.sub_menu = True
 
         if item_type == 'burger':
             self.status['hunger'] += 15
@@ -401,26 +420,41 @@ class Tama:
         self.fbtext = str(self.status['happiness'])
         self.feedback_label.config(text=self.fbtext)
 
-    def show_status(self):
+    def show_status(self, page):
         """
         Muestra el estado de Tamagotchi.
         """
         self.label.after_cancel(reset)
-        # Cambiamos a SUB_MENU
-        self.main_menu = False
-        self.sub_menu = True
+        
+        if page == 'pagina1':
+            # Mostrar:
+            self.tiempo_actual = time.localtime()  # Time
+            self.fbtext = str(
+                f"""{time.strftime("%H:%M:%S", self.tiempo_actual)}
+                HAPPINESS : {self.status['happiness']}
+                HUNGER : {self.status['hunger']}%
+                ENERGY : {self.status['energy']}%
 
-        # Mostrar:
-        self.tiempo_actual = time.localtime()  # Time
-        self.fbtext = str(time.strftime("%H:%M:%S", self.tiempo_actual))
-        self.feedback_label.config(text=self.fbtext)  # Attributes
-        for key, value in self.status.items():
-            self.fbtext = str(key, ' = ', value)
+                """
+            )
             self.feedback_label.config(text=self.fbtext)
 
-        self.label.after(10000, self.reset_gui)
+        elif page == 'pagina2':
+            # Mostrar:
+            self.tiempo_actual = time.localtime()  # Time
+            self.fbtext = str(
+                f"""{time.strftime("%H:%M:%S", self.tiempo_actual)}
+                HYGENE : {self.status['hygiene']}%
+                SICK : {self.status['sick']}
+                POOP : {self.status['poop']}
 
-    update_times = 20
+                """
+            )
+            self.feedback_label.config(text=self.fbtext)
+
+        reset = self.label.after(10000, self.reset_gui)
+
+    UPDATETIME = 20
     time_hunger = 1
     time_poop = 1
     time_energy = 6

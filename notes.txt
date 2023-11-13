@@ -7,14 +7,14 @@ Tama = 150px x 200px
 
 cosas que hacer
 
-- hemos creado main menu y sub menu, 
-tenemos que bucar la logica de como pasar 
-de uno a otro
-
 - tenemos que disenar los sub menu de comida 
 y estatus
+--- por el momento usaremos FEEDBACK_LABEL
 
 - investigar la logica de tiempo y tkinter
+---posible usar after() y after_cancel()
+
+- no consigo que se muestren las funciones de los SUBMENUS de Show_status
 
 - disenar las funciones del menu
 
