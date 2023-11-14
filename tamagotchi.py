@@ -203,6 +203,7 @@ class Tama:
         """
         Función que se ejecuta al presionar el botón A.
         """
+       
         # Lógica para avanzar
         if self.main_menu == True and self.sub_menu == False:
             try:
@@ -225,6 +226,9 @@ class Tama:
             self.fbtext = str(self.menu_value)
             self.feedback_label.config(text=self.fbtext)
 
+            # return self.SUBMENU , self.ITERSUBMENU 
+
+
         elif self.main_menu == False and self.sub_menu == True:
             # pasa a seleccionar la lista del SUB MENU
 
@@ -239,6 +243,9 @@ class Tama:
             self.fbtext = str(self.submenu_value)
             self.feedback_label.config(text=self.fbtext)
 
+        print('Menu value = ',self.menu_value,'. --> B_NEXT')
+        print('Submenu value = ',self.submenu_value,'. --> B_NEXT')
+
     def b_select(self):
         """
         Función que se ejecuta al presionar el botón B.
@@ -252,7 +259,7 @@ class Tama:
                     pass
 
         elif self.main_menu == False and self.sub_menu == True:
-            print(self.submenu_value)
+            print('Submenu value = ',self.submenu_value,'. --> B_SELECT')
             if self.submenu_value != 'none':
                 try:
                     self.SUBMENU[self.submenu_value]['funct'][0](
@@ -284,6 +291,8 @@ class Tama:
             self.main_menu = True
             self.sub_menu = False
             reset = self.label.after(5000, self.reset_gui)
+        self.SUBMENU = None
+        self.submenu_value= None
 
     ## Funciones automáticas de TAMA ##
     #################################
@@ -294,6 +303,10 @@ class Tama:
         """
         self.ITERMENU = iter(self.MENU)
         self.menu_value = next(self.ITERMENU)
+
+    #######################################
+    #### funcion para organizr submenu?? ##
+    #######################################
 
     def reset_gui(self):
         """
@@ -343,6 +356,12 @@ class Tama:
 
         self.main_menu = False
         self.sub_menu = True
+
+        # muestra las opciones
+
+        print('Submenu value = ', self.submenu_value,'. --> ACTIVATE_SUBMENU')
+        print('next(self.ITERSUBMENU) = ',next(self.ITERSUBMENU),'. --> ACTIVATE_SUBMENU')
+        
 
     def feed(self, item_type):
         """
@@ -425,10 +444,15 @@ class Tama:
         Muestra el estado de Tamagotchi.
         """
         self.label.after_cancel(reset)
-        
+        print(f'Valor que estamos pasando a la funcion = {page}')
+
+        if self.submenu_value == None:
+            self.submenu_value =(next(self.ITERSUBMENU)) 
+      
         if page == 'pagina1':
             # Mostrar:
             self.tiempo_actual = time.localtime()  # Time
+            self.fbtext = str(f'{time.strftime("%H:%M:%S", self.tiempo_actual)}')
             self.fbtext = str(
                 f"""{time.strftime("%H:%M:%S", self.tiempo_actual)}
                 HAPPINESS : {self.status['happiness']}
