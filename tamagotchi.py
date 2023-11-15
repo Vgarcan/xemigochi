@@ -359,6 +359,10 @@ class Tama:
 
         # muestra las opciones
 
+        submenu_options = ', \n'.join(self.SUBMENU.keys())
+        self.fbtext = f"Selecciona una opción:\n {submenu_options}"
+        self.feedback_label.config(text=self.fbtext)
+
         print('Submenu value = ', self.submenu_value,'. --> ACTIVATE_SUBMENU')
         print('next(self.ITERSUBMENU) = ',next(self.ITERSUBMENU),'. --> ACTIVATE_SUBMENU')
         

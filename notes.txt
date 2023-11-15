@@ -5,6 +5,66 @@ screen with margins = 392px x 325px
 Tama = 150px x 200px
 
 
+
+
+#############################################
+Diagrama de Flujo Detallado de la Clase Tama:
+#############################################
+
+-Inicio:
+Se inicia el programa y se crea una instancia de la clase Tama.
+
+-Inicialización:
+Se ejecuta el método __init__ que establece los atributos iniciales y la interfaz gráfica.
+
+-Interacción con la Interfaz Gráfica:
+Se espera la interacción del usuario con los botones A, B y C, así como con otros elementos de la interfaz.
+
+-Botón A (b_next):
+Si se está en el menú principal:
+Avanza al siguiente elemento del menú.
+Si el elemento del menú es un submenú, muestra las opciones del submenú.
+Si se está en un submenú:
+Avanza al siguiente elemento del submenú.
+Actualiza la interfaz gráfica.
+
+-Botón B (b_select):
+Si se está en el menú principal:
+-Si el elemento del menú es una acción directa, ejecuta la acción.
+-Si el elemento del menú es un submenú, muestra las opciones del submenú.
+Si se está en un submenú:
+-Ejecuta la acción asociada al elemento seleccionado en el submenú.
+-Si el elemento del submenú es otro submenú, muestra las opciones de ese submenú.
+Actualiza la interfaz gráfica.
+
+-Botón C (b_cancel):
+Si se está en el menú principal:
+--Si el elemento del menú es un submenú, retrocede al menú principal.
+Si se está en un submenú:
+--Retrocede al menú principal.
+Actualiza la interfaz gráfica.
+
+-Acciones Automáticas (add_hunger, subs_energy, etc.):
+Se ejecutan automáticamente acciones según el tiempo transcurrido y las necesidades de la mascota.
+
+-Acciones del Menú (feed, play, etc.):
+Se ejecutan acciones específicas según la selección del usuario en el menú y submenús.
+Algunas acciones pueden tener condiciones adicionales, como verificar la salud antes de ejecutar una acción de disciplina.
+
+-Verificación de Estado de la Mascota:
+Se realizan verificaciones del estado general de la mascota, como verificar si está enferma, si necesita ir al baño, etc.
+
+-Actualización de Tiempo:
+Se actualizan los atributos relacionados con el tiempo.
+
+-Fin:
+Termina el programa o espera nuevas interacciones del usuario.
+
+
+
+
+
+
 cosas que hacer
 
 - tenemos que disenar los sub menu de comida 
