@@ -1,5 +1,7 @@
 import tkinter as tk
 import time
+import datetime
+import random
 
 """
 Contenido:
@@ -14,31 +16,39 @@ Contenido:
     2.3. b_select
     2.4. b_cancel
 3. Funciones automáticas de TAMA
-    3.1. reset_menu
-    3.2. reset_gui
-    3.3. add_hunger
-    3.4. subs_energy
-    3.5. subs_happiness
-    3.6. goes_to_the_loo
+    3.1. movimiento_basico
+    3.2. show_pet
+    3.3. hide_pet
+    3.4. reset_menu
+    3.5. reset_gui
+    3.6. add_hunger
+    3.7. subs_energy
+    3.8. subs_happiness
+    3.9. goes_to_the_loo
 4. Funciones del Menú
-    4.1. feed
-    4.2. play
-    4.3. health
-    4.4. clean
-    4.5. sleep
-    4.6. lights
-    4.7. discipline
-    4.8. show_status
+    4.1. activate_submenu
+    4.2. feed
+    4.3. play
+    4.4. health
+    4.5. clean
+    4.6. sleep
+    4.7. lights
+    4.8. discipline
+    4.9. show_status
 5. Atributos de Tiempo
     5.1. update_times
     5.2. time_hunger
     5.3. time_poop
     5.4. time_energy
     5.5. time_happiness
+    5.6. tiempo_actual
+    5.7. UPDATETIME
+
 """
 
 
 class Tama:
+
     def __init__(self, name):
         """
         Inicia una instancia de la clase Tama (Tamagotchi).
@@ -153,6 +163,19 @@ class Tama:
         self.canvas.create_image(288, 324, image=self.background_img)
         self.canvas.grid(row=0, column=0)
 
+        # Crea un canvas para contener la imagen de la mascota
+        self.pet = tk.Canvas(width=387, height=287)
+        self.pet_img = tk.PhotoImage(file="imgs/monkey.png")
+        # Genera el movimiento en la siguiente linea
+        self.posx = 72
+        self.posy = 200
+        #### ------------------------------------####
+        self.canvas_pet = self.pet.create_image(self.posx, self.posy, image=self.pet_img)
+        self.pet.config(bg='white', highlightthickness=0)
+        self.show_pet()
+
+        #########################
+
         # Botones de navegación CONFIG
         self.button_img = tk.PhotoImage(file='imgs/icons/button_small.png')
         # Boton A
@@ -172,6 +195,21 @@ class Tama:
         self.fbtext = ''
         self.feedback_label = tk.Label(text=f"{self.fbtext}")
         self.feedback_label.place(x=280, y=333)
+
+        # Timing!
+        self.UPDATETIME = {
+            "time_hunger": [1, self.add_hunger],
+            "time_poop": [1, self.goes_to_the_loo],
+            "time_energy": [6, self.subs_energy],
+            "time_happiness": [12, self.subs_happiness],
+        }
+
+    def check_times(self):
+        time_now_min = int(datetime.datetime.now().strftime('%M'))
+        for value in self.UPDATETIME:
+            if self.UPDATETIME[value][0] % time_now_min == 0:
+                self.UPDATETIME[value][1]()
+    
 
     ## Funciones para los botones de la interfaz ##
     ##############################################
@@ -203,7 +241,7 @@ class Tama:
         """
         Función que se ejecuta al presionar el botón A.
         """
-       
+
         # Lógica para avanzar
         if self.main_menu == True and self.sub_menu == False:
             try:
@@ -226,8 +264,7 @@ class Tama:
             self.fbtext = str(self.menu_value)
             self.feedback_label.config(text=self.fbtext)
 
-            # return self.SUBMENU , self.ITERSUBMENU 
-
+            # return self.SUBMENU , self.ITERSUBMENU
 
         elif self.main_menu == False and self.sub_menu == True:
             # pasa a seleccionar la lista del SUB MENU
@@ -243,30 +280,35 @@ class Tama:
             self.fbtext = str(self.submenu_value)
             self.feedback_label.config(text=self.fbtext)
 
-        print('Menu value = ',self.menu_value,'. --> B_NEXT')
-        print('Submenu value = ',self.submenu_value,'. --> B_NEXT')
-
     def b_select(self):
         """
         Función que se ejecuta al presionar el botón B.
         """
+        # Si estamos en MENU 
         if self.main_menu == True and self.sub_menu == False:
-
+            # Si el MENU_VALUE no esta vacio
             if self.menu_value != 'none':
+                # Ejecutara la funcion correspondiente a MENU_VALUE
                 try:
                     self.MENU[self.menu_value]['funct']()
-                except Exception:
+                # Si existe algun problema no hará nada he imprimira el problema
+                except Exception as e:
+                    print(e)
                     pass
-
+        # Si estamos en el SUB MENU            
         elif self.main_menu == False and self.sub_menu == True:
-            print('Submenu value = ',self.submenu_value,'. --> B_SELECT')
+            # Si SUBMENU_VALUE no esta vacio
             if self.submenu_value != 'none':
+                # Ejecutara la funcion correspondiente a SUBMENU_VALUE
                 try:
                     self.SUBMENU[self.submenu_value]['funct'][0](
                         self.SUBMENU[self.submenu_value]['funct'][1]
                     )
-                except Exception:
+                # Si existe algun problema no hará nada he imprimira el problema
+                except Exception as e:
+                    print(e)
                     pass
+            # Si SUBMENU_VALUE esta vacio selecciona el primero de la lista 
             elif self.submenu_value == 'none':
                 self.submenu_value = next(self.ITERSUBMENU)
                 pass
@@ -284,18 +326,53 @@ class Tama:
 
             if hasattr(self, 'label') and isinstance(self.label, tk.Label):
                 self.label.place_forget()
+                self.feedback_label.config(text="")
 
         elif self.main_menu == False and self.sub_menu == True:
             # pasa a seleccionar la lista del MAIN MENU
             # cambia al MAIN MENU
             self.main_menu = True
             self.sub_menu = False
+            self.feedback_label.config(text=self.menu_value)
+            self.show_pet()
             reset = self.label.after(5000, self.reset_gui)
         self.SUBMENU = None
-        self.submenu_value= None
+        self.submenu_value = None
 
     ## Funciones automáticas de TAMA ##
     #################################
+
+    def movimiento_basico(self):
+        """
+        Realiza un movimiento básico de la mascota Tamagotchi.
+
+        Genera nuevas coordenadas aleatorias dentro de un rango predefinido
+        y actualiza la posición de la mascota en la interfaz gráfica.
+
+        """
+        new_posx = random.randint(72, 315)
+        new_posy = random.randint(119, 168)
+
+        self.posx = new_posx
+        self.posy = new_posy
+
+        self.pet.coords(self.canvas_pet, self.posx, self.posy)
+        self.pet.update()
+        self.pet.after(3000, self.movimiento_basico)
+
+    def show_pet(self):
+        """
+        Muestra la mascota Tamagotchi en la interfaz gráfica.
+
+        """
+        self.pet.place(x=93, y=186)
+
+    def hide_pet(self):
+        """
+        Oculta la mascota Tamagotchi de la interfaz gráfica.
+
+        """
+        self.pet.place_forget()
 
     def reset_menu(self):
         """
@@ -317,6 +394,7 @@ class Tama:
         self.main_menu = True
         self.sub_menu = False
         self.feedback_label.config(text='')
+        self.show_pet()
 
     def add_hunger(self):
         """
@@ -352,20 +430,24 @@ class Tama:
         """
         Activa el SUBMENU de feed.
         """
+        # Cancela RESET
         self.label.after_cancel(reset)
-
+        # Cambia del MENU A SUB_MENU
         self.main_menu = False
         self.sub_menu = True
+        # Esconde la MASCOTA
+        self.hide_pet()
 
         # muestra las opciones
+        if self.SUBMENU[self.submenu_value]['funct'][0] == 'show_status':
+            self.SUBMENU[self.submenu_value]['funct'][0](
+                        self.SUBMENU[self.submenu_value]['funct'][1]
+                    )
 
-        submenu_options = ', \n'.join(self.SUBMENU.keys())
-        self.fbtext = f"Selecciona una opción:\n {submenu_options}"
-        self.feedback_label.config(text=self.fbtext)
-
-        print('Submenu value = ', self.submenu_value,'. --> ACTIVATE_SUBMENU')
-        print('next(self.ITERSUBMENU) = ',next(self.ITERSUBMENU),'. --> ACTIVATE_SUBMENU')
-        
+        else:
+            submenu_options = ', \n'.join(self.SUBMENU.keys())
+            self.fbtext = f"Selecciona una opción:\n {submenu_options}"
+            self.feedback_label.config(text=self.fbtext)
 
     def feed(self, item_type):
         """
@@ -448,17 +530,15 @@ class Tama:
         Muestra el estado de Tamagotchi.
         """
         self.label.after_cancel(reset)
-        print(f'Valor que estamos pasando a la funcion = {page}')
 
         if self.submenu_value == None:
-            self.submenu_value =(next(self.ITERSUBMENU)) 
-      
+            self.submenu_value = (next(self.ITERSUBMENU))
+
         if page == 'pagina1':
             # Mostrar:
             self.tiempo_actual = time.localtime()  # Time
-            self.fbtext = str(f'{time.strftime("%H:%M:%S", self.tiempo_actual)}')
             self.fbtext = str(
-                f"""{time.strftime("%H:%M:%S", self.tiempo_actual)}
+                f"""{time.strftime('%H:%M:%S', self.tiempo_actual)}
                 HAPPINESS : {self.status['happiness']}
                 HUNGER : {self.status['hunger']}%
                 ENERGY : {self.status['energy']}%
@@ -471,7 +551,7 @@ class Tama:
             # Mostrar:
             self.tiempo_actual = time.localtime()  # Time
             self.fbtext = str(
-                f"""{time.strftime("%H:%M:%S", self.tiempo_actual)}
+                f"""{time.strftime('%H:%M:%S', self.tiempo_actual)}
                 HYGENE : {self.status['hygiene']}%
                 SICK : {self.status['sick']}
                 POOP : {self.status['poop']}
@@ -481,9 +561,3 @@ class Tama:
             self.feedback_label.config(text=self.fbtext)
 
         reset = self.label.after(10000, self.reset_gui)
-
-    UPDATETIME = 20
-    time_hunger = 1
-    time_poop = 1
-    time_energy = 6
-    time_happiness = 12
